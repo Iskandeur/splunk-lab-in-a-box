@@ -1,0 +1,20 @@
+status,status_description,status_type
+100,Continue,Informational
+200,OK,Success
+201,Created,Success
+204,No Content,Success
+301,Moved Permanently,Redirect
+302,Found,Redirect
+304,Not Modified,Redirect
+400,Bad Request,Client Error
+401,Unauthorized,Client Error
+403,Forbidden,Client Error
+404,Not Found,Client Error
+405,Method Not Allowed,Client Error
+406,Not Acceptable,Client Error
+408,Request Timeout,Client Error
+500,Internal Server Error,Server Error
+501,Not Implemented,Server Error
+502,Bad Gateway,Server Error
+503,Service Unavailable,Server Error
+505,HTTP Version Not Supported,Server Error

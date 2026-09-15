@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "purpose": "Machine-readable curriculum. An agent can grade a learner's answer by running the `spl` of a mission and comparing with `expect`. Figures are exact and stable across reloads unless `stable` is false.",
+  "dataset": {
+    "index": "tutorial",
+    "events": 109864,
+    "sourcetypes": {
+      "access_combined_wcookie": 39532,
+      "secure-2": 40088,
+      "vendor_sales": 30244
+    },
+    "hosts": 5,
+    "sources": 8,
+    "default_range": "-30d",
+    "traps": [
+      "timestamps shifted by whole days: weekday names are an artifact",
+      "secure-2 has only 8 distinct timestamps: never use it for time exercises",
+      "categoryId holds the literal string NULL in 2041 events on top of 22364 absent ones",
+      "the optimizer rewrites stats count by _time into tstats, which buckets by day"
+    ]
+  },
+  "labs": [
+    {
+      "id": "00-orientation-and-fields",
+      "title": "Orientation and fields",
+      "minutes": 20,
+      "missions": [
+        {
+          "id": "M0",
+          "ask": "how many hosts, sources, sourcetypes",
+          "expect": "5 / 8 / 3"
+        },
+        {
+          "id": "M1",
+          "ask": "count by host, source, sourcetype",
+          "spl": "index=tutorial | stats count by host, source, sourcetype | stats count",
+          "expect": "8"
+        },
+        {
+          "id": "M2",
+          "ask": "web events with status=200",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie status=200 | stats count",
+          "expect": "34282"
+        },
+        {
+          "id": "M2b",
+          "ask": "bare term 200 (shows terms != fields)",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie \"200\" | stats count",
+          "expect": "34333"
+        },
+        {
+          "id": "M3",
+          "ask": "web events with no action field",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie NOT action=* | stats count",
+          "expect": "19814"
+        },
+        {
+          "id": "M4",
+          "ask": "action!=purchase (the != trap)",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie action!=purchase | stats count",
+          "expect": "13981"
+        },
+        {
+          "id": "M5",
+          "ask": "busiest client ip",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | top limit=1 clientip",
+          "expect": "87.194.216.51 / 1036"
+        }
+      ]
+    },
+    {
+      "id": "01-visualization",
+      "title": "Visualization",
+      "minutes": 25,
+      "missions": [
+        {
+          "id": "M1",
+          "ask": "non-empty hourly buckets",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | timechart span=1h count | where count>0 | stats count",
+          "expect": "169"
+        },
+        {
+          "id": "M2",
+          "ask": "number of status series",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats dc(status)",
+          "expect": "9"
+        },
+        {
+          "id": "M5",
+          "ask": "the three states of categoryId",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | eval state=case(isnull(categoryId),\"absent\",categoryId==\"NULL\",\"literal\",1==1,\"real\") | stats count by state",
+          "expect": "absent 22364 / literal 2041 / real 15127"
+        }
+      ]
+    },
+    {
+      "id": "02-working-with-time",
+      "title": "Working with time",
+      "minutes": 25,
+      "missions": [
+        {
+          "id": "M4",
+          "ask": "non-empty 4h buckets",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | bin _time span=4h | stats count by _time | stats count",
+          "expect": "43"
+        },
+        {
+          "id": "M5",
+          "ask": "busiest hour of day",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count by date_hour | sort - count | head 1",
+          "expect": "3 / 2378",
+          "note": "date_hour is not zero-padded; strftime(_time,'%H') would give 03"
+        },
+        {
+          "id": "M6",
+          "ask": "distinct sessions",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats dc(JSESSIONID)",
+          "expect": "5297"
+        }
+      ]
+    },
+    {
+      "id": "03-statistical-processing",
+      "title": "Statistical processing",
+      "minutes": 25,
+      "missions": [
+        {
+          "id": "M1",
+          "ask": "five summary numbers",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count dc(clientip) dc(JSESSIONID) sum(bytes) avg(bytes)",
+          "expect": "39532 / 182 / 5297 / 82927431 / 2097.7292067186077",
+          "note": "the lab rounds the mean to 2097.7"
+        },
+        {
+          "id": "M2",
+          "ask": "rows of host x status (observed pairs only)",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count by host status | stats count",
+          "expect": "24"
+        },
+        {
+          "id": "M5",
+          "ask": "events above the overall mean size",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | eventstats avg(bytes) as m | where bytes>m | stats count",
+          "expect": "19744"
+        }
+      ]
+    },
+    {
+      "id": "04-lookups-and-subsearches",
+      "title": "Lookups and subsearches",
+      "minutes": 30,
+      "requires": "lookup definitions prices_lookup and http_status_lookup, created by the learner in M1",
+      "missions": [
+        {
+          "id": "M0",
+          "ask": "products in the price file",
+          "spl": "| inputlookup prices.csv | stats count",
+          "expect": "16"
+        },
+        {
+          "id": "M2",
+          "ask": "top revenue product",
+          "spl": "index=tutorial sourcetype=vendor_sales | lookup prices_lookup Code OUTPUT product_name sale_price | stats sum(sale_price) as revenue by product_name | sort 1 -revenue",
+          "expect": "Dream Crusher / 73595.55"
+        },
+        {
+          "id": "M3",
+          "ask": "discount cost",
+          "spl": "index=tutorial sourcetype=vendor_sales | lookup prices_lookup Code OUTPUT price sale_price | stats sum(price) as c sum(sale_price) as p | eval lost=round(c-p,2)",
+          "expect": "187303.00"
+        },
+        {
+          "id": "M4",
+          "ask": "requests by status_type",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | lookup http_status_lookup status OUTPUT status_type | stats count by status_type",
+          "expect": "Success 34282 / Client Error 3085 / Server Error 2165"
+        },
+        {
+          "id": "M5",
+          "ask": "lookup coverage check (must be zero)",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | lookup http_status_lookup status OUTPUT status_type | where isnull(status_type) | stats count",
+          "expect": "0"
+        },
+        {
+          "id": "M6",
+          "ask": "purchases of products above 30 catalogue",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie action=purchase [| inputlookup prices.csv | where price>30 | fields productId] | stats count",
+          "expect": "613"
+        },
+        {
+          "id": "M7",
+          "ask": "site-wide 5xx rate",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count as n count(eval(status>=500)) as err | eval rate=round(err*100/n,3)",
+          "expect": "5.477"
+        }
+      ]
+    },
+    {
+      "id": "05-search-optimization",
+      "title": "Search optimization and detection sizing",
+      "minutes": 30,
+      "note": "scan counts are read in the Job Inspector, not returned by a search",
+      "missions": [
+        {
+          "id": "M1",
+          "ask": "scan count, filter in base vs after pipe",
+          "expect": "1004 vs 39532 for 952 results"
+        },
+        {
+          "id": "M2",
+          "ask": "index=* vs index=tutorial scan",
+          "expect": "79064 vs 39532"
+        },
+        {
+          "id": "M4",
+          "ask": "wildcard scan counts",
+          "expect": "exact 1036 / trailing 1036 / leading 2548"
+        },
+        {
+          "id": "M5",
+          "ask": "tstats boundary: by action returns nothing",
+          "spl": "| tstats count where index=tutorial by action | stats count",
+          "expect": "0"
+        },
+        {
+          "id": "M6",
+          "ask": "requests needed per IP for a 4-sigma doubling test",
+          "expect": "276"
+        }
+      ]
+    }
+  ]
+}

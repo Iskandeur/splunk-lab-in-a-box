@@ -1,0 +1,5 @@
+setup/.env
+setup/.work/
+.lab-progress.json
+__pycache__/
+*.pyc
