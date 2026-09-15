@@ -1,16 +1,26 @@
-# Lab 02 — Working with time
+# Lab 03 — Working with time
+
+**Day 4.** Someone asks "how many yesterday?" and you realise that the word *yesterday* has at
+least three different meanings in Splunk. Time is the lever that decides what every search costs and
+what it means.
 
 **Time:** 25 min.
+
+**Before you start:** labs 00–02.
+**After this lab you can:** write any range by hand, snap it so it means the same thing tomorrow,
+choose a bucket size, and recognise a timezone bug before it reaches a dashboard.
 
 > ⚠️ **Two facts about this dataset, before you start.**
 > 1. It was **shifted forward by a whole number of days** at load time so that it ends within the
 >    last 24 hours. *Today* is therefore nearly empty, and **weekday names are meaningless** — the
 >    shift moved them. Hour-of-day, on the other hand, is intact.
-> 2. **Never do a time exercise on `secure-2`**: its 40 088 events carry only **8 distinct
->    timestamps** (a whole day of SSH logs shares `23:23:5x`). That is how the vendor's file is
->    built. Use `access_combined_wcookie` for anything involving time. `vendor_sales` is
->    synthetically flat — 180 events per hour, every hour — which makes it useless for trends and
->    convenient for statistics.
+> 2. **Never do a time exercise on `secure-2`**. Check it yourself in ten seconds —
+>    `index=tutorial sourcetype=secure-2 | stats dc(_time), count` — and you will find a couple of
+>    dozen distinct timestamps for **40 088 events** (18 when this lab was written; the vendor
+>    regenerates the archive and the number moves, which is why you measure instead of trusting me).
+>    That is how the file is built, not a loading bug. Use `access_combined_wcookie` for anything
+>    involving time. `vendor_sales` is synthetically flat — 180 events per hour, every hour — which
+>    makes it useless for trends and convenient for statistics.
 
 ---
 
@@ -116,6 +126,15 @@ show the five longest with readable start and end times.
 
 > 💡 Compute the duration first, format afterwards. If you format first you will get null.
 
+### Challenge
+
+For each day of the dataset, find the **busiest hour of that day** — one row per day. This is the
+first search of the course where the answer is not a single aggregate, and the trick is that you have
+to aggregate twice.
+
+> 💡 Bucket to the hour, count, then keep the best row per day. `dedup` after a `sort` is one way;
+> `stats max()` with a `by` clause is another.
+
 ---
 
 ## Answer key
@@ -155,3 +174,8 @@ depend on the hour you run them — compare the order of magnitude, not the digi
   ```
   There are **5 297** distinct sessions (exact). `_time` is a number; once `strftime` has turned it
   into a string, subtraction is meaningless.
+- **Challenge** — `| bin _time span=1h | stats count by _time | eval day=strftime(_time,"%F"),
+  hour=strftime(_time,"%H") | sort - count | dedup day | sort day` → the peak hour is **not the same
+  every day** (03:00 wins overall, but individual days peak at 00:00, 19:00, 03:00…). A single
+  aggregate over the whole week would have hidden that variation entirely, which is the honest answer
+  to "when is our busy hour?": *it moves*.

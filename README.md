@@ -1,7 +1,7 @@
 # splunk-lab-in-a-box
 
 A complete, self-hosted Splunk lab: one container, the official *Buttercup Games* tutorial dataset
-(109 864 events), and **six labs that replace the vendor's video courses**. Every answer key is a
+(109 864 events), and **nine labs that replace the vendor's video courses**. Every answer key is a
 figure measured on the running instance, not a recollection.
 
 It is also built to be driven by an **AI coding agent**: clone it, open Claude Code (or any agent
@@ -36,17 +36,30 @@ Two problems had to be solved to make that work offline:
 
 | # | lab | what you leave with |
 |---|---|---|
-| 00 | [Orientation and fields](labs/00-orientation-and-fields.md) | metadata vs extracted fields, terms vs fields, the `!=` trap |
-| 01 | [Visualization](labs/01-visualization.md) | `timechart`/`chart`/`stats`, spans, `OTHER` and `NULL`, dashboards |
-| 02 | [Working with time](labs/02-working-with-time.md) | `earliest`/`latest`, snapping, `bin`, `strftime`, timezone bugs |
-| 03 | [Statistical processing](labs/03-statistical-processing.md) | `stats` vs `eventstats`, percentiles, long vs wide |
-| 04 | [Lookups and subsearches](labs/04-lookups-and-subsearches.md) | enrichment, subsearch rules, base rates |
-| 05 | [Search optimization](labs/05-search-optimization.md) | scan counts, the optimiser, `tstats`, sizing a detection |
+| 00 | [First day: orientation and fields](labs/00-orientation-and-fields.md) | metadata vs extracted fields, terms vs fields, the `!=` trap |
+| 01 | [The search language](labs/01-the-search-language.md) | `eval`, `where`, `rex`, building fields the data never had |
+| 02 | [Visualization](labs/02-visualization.md) | `timechart`/`chart`/`stats`, spans, `OTHER` and `NULL`, dashboards |
+| 03 | [Working with time](labs/03-working-with-time.md) | `earliest`/`latest`, snapping, `bin`, timezone bugs |
+| 04 | [Statistical processing](labs/04-statistical-processing.md) | `stats` vs `eventstats`, percentiles, long vs wide |
+| 05 | [Lookups and subsearches](labs/05-lookups-and-subsearches.md) | enrichment, subsearch rules, base rates |
+| 06 | [Making knowledge stick](labs/06-knowledge-objects.md) | field extractions, event types, tags, reports, macros |
+| 07 | [Search optimization](labs/07-search-optimization.md) | scan counts, the optimiser, `tstats`, sizing a detection |
+| 08 | [Capstone: the 3 a.m. page](labs/08-capstone-investigation.md) | a full investigation, end to end |
 
-Labs 00–03 take 20–25 minutes each, 04 and 05 about 30. The whole path is a focused afternoon.
+The labs are a story. You are the first analyst hired by Buttercup Games; each lab is a day on the
+job, each opens with what you need and what you will be able to do, and each ends with an optional
+**Challenge**. Lab 08 is the page at three in the morning that uses all of it — and its answer is not
+the one the alert suggests.
 
-Lab 05 ends on something the courses do not teach: how to size a detection so that it can actually
-fire, and how to compute the number of false alerts a threshold will generate before you deploy it.
+About four hours in total — a focused afternoon, or a lab a day for nine days. If you only have one
+hour, do 00, 01 and 05; if you only want the part no course teaches, read 07 and do 08.
+
+Every figure in every answer key was measured on a running instance, and you can re-verify all of
+them yourself:
+
+```bash
+./setup/check-keys.py       # 35 figures replayed against your own lab
+```
 
 ## Using it with an agent
 

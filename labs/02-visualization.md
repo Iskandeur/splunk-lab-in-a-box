@@ -1,7 +1,15 @@
-# Lab 01 — Visualization
+# Lab 02 — Visualization
+
+**Day 3.** Your first table impressed nobody. Marketing wants pictures, and the only honest way
+to draw one is to understand what the drawing hides.
 
 **Time:** 25 min · **Range:** *Last 30 days* unless stated. Spend this lab in the **Visualization**
 tab and the **Format** menu — half the subject lives there, not in SPL.
+
+**Before you start:** labs 00–01.
+**After this lab you can:** choose between `stats`, `chart` and `timechart` on purpose, pick a span
+that shows the signal, and spot the two columns (`OTHER`, `NULL`) that quietly change what a graph
+claims.
 
 ---
 
@@ -118,6 +126,13 @@ review looks like in a real team.
 Last question: your Single Value panel uses a relative range. What will it show tomorrow morning,
 and is that a bug?
 
+### Challenge
+
+Chart the server-error **rate** per day rather than the error count. A rate is not a series Splunk
+can draw directly — you have to compute it inside the `timechart`.
+
+> 💡 `timechart` accepts `count(eval(...))` just like `stats` does, and `eval` works on the result.
+
 ---
 
 ## Answer key
@@ -158,3 +173,8 @@ and is that a bug?
 - **M7** — tomorrow the panel shows zero, and that is **correct behaviour**: a relative range empties
   when the source goes quiet, which is exactly how you notice a dead collector in production. Here it
   only means the lab data needs re-shifting (`./setup/lab.sh reindex --yes`).
+- **Challenge** — `| timechart span=1d count(eval(status>=500)) as err, count as total
+  | eval rate=round(err*100/total,2)` → the daily 5xx rate sits between **5,03 %** and **6,31 %**
+  across the week. A count chart would have shown the shape of your **traffic**; the rate chart shows
+  the shape of your **reliability**, and they are different pictures of the same data. Anything
+  remarkable would stand out against that flat band — which is exactly the reasoning lab 08 needs.

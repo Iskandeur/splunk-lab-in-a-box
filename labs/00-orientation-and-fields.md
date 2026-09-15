@@ -1,6 +1,14 @@
-# Lab 00 — Orientation and fields
+# Lab 00 — First day: orientation and fields
+
+**Day 1.** You have just joined Buttercup Games, an online shop selling video games, as their
+first data analyst. Three log sources were plugged into Splunk last week and nobody has ever asked
+it a question. Today you learn to find things.
 
 **Time:** 20 min · **Range for every exercise:** *Last 30 days* (covers the whole dataset).
+
+**Before you start:** nothing — this is the entry point.
+**After this lab you can:** tell metadata from extracted fields, filter on either, and avoid the two
+traps (`"200"` vs `status=200`, and `!=` vs `NOT`) that silently return the wrong number.
 
 ---
 
@@ -131,8 +139,14 @@ index=tutorial sourcetype=access_combined_wcookie | search status=200 | stats co
 index=tutorial sourcetype=access_combined_wcookie status=200 | stats count
 ```
 
-Which one would you write, and why? Keep your answer — lab 05 measures it, and the result will
+Which one would you write, and why? Keep your answer — lab 07 measures it, and the result will
 surprise you.
+
+### Challenge
+
+Which client address **converts** best? Rank addresses by the share of their requests that end in a
+purchase, keeping only those with at least 200 requests. You will need one `stats` with two counts
+in it — the pattern that carries the rest of this course.
 
 ---
 
@@ -159,5 +173,10 @@ surprise you.
   Note that the rarest code is not the most serious one: 403 is a routine refusal, while the 952
   `503` are real outages. Frequency says nothing about severity.
 - **M6** — write the filter in the base search. Not because the pipeline version is always slower —
-  lab 05 will show you Splunk often rewrites it for you — but because it is the only version whose
+  lab 07 will show you Splunk often rewrites it for you — but because it is the only version whose
   cost does not depend on an optimiser understanding your intent.
+- **Challenge** — `| stats count as reqs, count(eval(action=="purchase")) as buys by clientip
+  | where reqs>=200 | eval rate=round(buys*100/reqs,2) | sort - rate` → **74.125.19.106**, 47
+  purchases out of 232 requests, **20,26 %**. Note what the `where` is doing: without a minimum
+  volume, an address with 2 requests and 1 purchase would top the ranking at 50 %. Every ranking of
+  a ratio needs a floor — lab 07 turns that intuition into a calculation.

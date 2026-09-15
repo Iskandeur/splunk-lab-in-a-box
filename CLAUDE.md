@@ -7,7 +7,7 @@ reply; it is short on purpose.
 ## What this repo is
 
 A turnkey Splunk lab: one container, the official *Buttercup Games* tutorial dataset (109 864
-events), and six labs that replace the vendor's video courses. Everything the learner needs is here
+events), and nine labs that replace the vendor's video courses. Everything the learner needs is here
 — they should never have to watch a video or read vendor documentation to progress.
 
 ## Your first move, every session
@@ -70,8 +70,15 @@ default time range is `-30d`, which covers the whole dataset.
 - The dataset is **time-shifted** by a whole number of days at load time so it ends yesterday.
   Consequence: *Today* is always empty, and **weekday names are an artifact** — no conclusion about
   "the busiest day of the week" is meaningful. Hour-of-day *is* meaningful.
-- `secure-2` has only **8 distinct timestamps** (a whole day of SSH logs shares `23:23:5x`). It is
-  useless for anything time-based. Send them to `access_combined_wcookie` for that.
+- `secure-2` carries **18 distinct timestamps for 40 088 events** (measured 2026-09-15; the vendor
+  regenerates the archive, so re-measure with `| stats dc(_time)` rather than quoting this number).
+  It is useless for anything time-based — send them to `access_combined_wcookie` for that.
+- `secure-2` has **almost no extracted fields**: no user, no source IP. That is deliberate material
+  for the `rex` lab, not a loading failure. And **184 of its events spell `failed password` in
+  lowercase** — a case-sensitive regex drops exactly those, which happen to be the only *internal*
+  failures in the dataset.
+- Every one of the **182** web client IPs also appears in the SSH failure logs. A 100 % overlap is a
+  property of a generated dataset, not evidence of anything; lab 08 makes the learner discover it.
 - `vendor_sales` is synthetically flat (180 events/hour). Good for statistics, useless for trends.
 - `categoryId` carries the **literal string `"NULL"`** in 2 041 events (it comes from the referer
   URL) on top of 22 364 events where the field is simply absent. Two different populations under one
@@ -97,15 +104,28 @@ they are:
 | lab | subject | time |
 |---|---|---|
 | [00](labs/00-orientation-and-fields.md) | orientation, metadata, fields | 20 min |
-| [01](labs/01-visualization.md) | timechart, chart, dashboards | 25 min |
-| [02](labs/02-working-with-time.md) | time ranges, snapping, spans | 25 min |
-| [03](labs/03-statistical-processing.md) | stats, eventstats, percentiles | 25 min |
-| [04](labs/04-lookups-and-subsearches.md) | lookups, subsearches, base rates | 30 min |
-| [05](labs/05-search-optimization.md) | cost, tstats, detection sizing | 30 min |
+| [01](labs/01-the-search-language.md) | eval, where, rex, field shaping | 25 min |
+| [02](labs/02-visualization.md) | timechart, chart, dashboards | 25 min |
+| [03](labs/03-working-with-time.md) | ranges, snapping, spans | 25 min |
+| [04](labs/04-statistical-processing.md) | stats, eventstats, percentiles | 25 min |
+| [05](labs/05-lookups-and-subsearches.md) | lookups, subsearches, base rates | 30 min |
+| [06](labs/06-knowledge-objects.md) | extractions, event types, reports, alerts | 30 min |
+| [07](labs/07-search-optimization.md) | cost, tstats, detection sizing | 30 min |
+| [08](labs/08-capstone-investigation.md) | capstone: an end-to-end investigation | 45 min |
+
+The labs form a story — the learner is the first analyst at an online game shop, each lab is a day,
+and lab 08 is the 3 a.m. page that uses everything. Each one opens with *before you start* / *after
+this lab you can*, and closes with an optional **Challenge** that is harder than the missions.
 
 Labs 04 and 05 are written as **missions**: a business request, a deliverable, a hint, an answer key.
 Labs 00–03 are more guided. If a learner asks for harder material, convert 00–03 to the mission shape
 on the fly — ask for a result, not a keystroke.
+
+**The answer keys are testable.** `./setup/check-keys.py` replays the 35 automatable figures of
+`labs/manifest.json` against the running instance (and temporarily creates the lookup definitions of
+lab 05 so the check does not depend on the learner's work). Run it after editing a lab, after a
+Splunk upgrade, or whenever a figure looks wrong — and fix the lab rather than arguing with the
+learner.
 
 ## Hard rules
 

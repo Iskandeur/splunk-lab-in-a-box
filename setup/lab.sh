@@ -12,6 +12,8 @@
 #   ./setup/lab.sh reindex     re-shift dates to today and reload (destructive, needs --yes)
 #   ./setup/lab.sh destroy     remove container AND volumes (needs --yes)
 #
+#   ./setup/check-keys.py     replay every answer-key figure against this instance
+#
 # Requirements: docker + docker compose v2, python3, curl, unzip.
 set -euo pipefail
 
@@ -238,5 +240,5 @@ case "${1:-}" in
   reindex) shift; cmd_reindex "$@" ;;
   stop) shift; cmd_stop "$@" ;;
   destroy) shift; cmd_destroy "$@" ;;
-  *) sed -n '2,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
+  *) sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
 esac

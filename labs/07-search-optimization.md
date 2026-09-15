@@ -1,6 +1,14 @@
-# Lab 05 — Search optimization and detection sizing
+# Lab 07 — Search optimization and detection sizing
+
+**Day 8.** Your searches now run without you, every fifteen minutes, on a cluster you share with
+everyone else. Today you learn what they cost and how to size a detection that can actually fire.
 
 **Time:** 30 min · **Range:** *Last 30 days* unless stated.
+
+**Before you start:** labs 00–06.
+**After this lab you can:** read a job's cost, rank the four levers that reduce it, tell when the
+optimiser has rewritten your search behind your back, and compute — before deploying — how many
+false alerts a threshold will produce.
 
 > **The setting.** You are a SOC analyst. Your searches do not run once in front of you — they run
 > **every 15 minutes, 24/7, on a shared cluster**. A query that costs ten times too much does not
@@ -143,6 +151,11 @@ in order:
 > 💡 Do not start with SPL. Start by measuring your throughput:
 > `index=tutorial sourcetype=access_combined_wcookie earliest=-24h | stats count by clientip
 > | stats count, max(count), avg(count)`.
+
+### Challenge
+
+Answer "how many events did host `www2` send yesterday?" with the cheapest search you can write, and
+prove it is cheaper. Then explain why the same trick cannot answer "how many of them were purchases?".
 
 ---
 
@@ -347,4 +360,10 @@ table.
 
 **10. The last step nobody takes.** **Prove your alert can fire.** Lower the threshold to `z > 1`,
 check that `107.3.146.207` shows up, then put it back. A detection that has never triggered and a
-broken one produce the same silence — the incomplete-lookup problem of lab 04, applied to security.
+broken one produce the same silence — the incomplete-lookup problem of lab 05, applied to security.
+- **Challenge** — `| tstats count where index=tutorial host=www2 earliest=-1d@d latest=@d` reads no
+  events at all, because `host` and `_time` are indexed fields. The purchase question cannot be
+  answered that way: `action` is extracted at search time, so it does not exist in the tsidx. That
+  boundary — indexed versus search-time fields — decides more about Splunk performance than any other
+  single fact, and it is the reason teams accelerate data models: an acceleration is, in essence, a
+  way of moving a search-time field into an index-time structure.

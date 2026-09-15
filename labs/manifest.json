@@ -22,7 +22,7 @@
   "labs": [
     {
       "id": "00-orientation-and-fields",
-      "title": "Orientation and fields",
+      "title": "First day: orientation and fields",
       "minutes": 20,
       "missions": [
         {
@@ -65,11 +65,48 @@
           "ask": "busiest client ip",
           "spl": "index=tutorial sourcetype=access_combined_wcookie | top limit=1 clientip",
           "expect": "87.194.216.51 / 1036"
+        },
+        {
+          "id": "CH",
+          "ask": "best purchase conversion rate, min 200 requests",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count as reqs count(eval(action==\"purchase\")) as buys by clientip | where reqs>=200 | eval rate=round(buys*100/reqs,2) | sort 1 -rate",
+          "expect": "74.125.19.106 / 20.26"
         }
       ]
     },
     {
-      "id": "01-visualization",
+      "id": "01-the-search-language",
+      "title": "The search language",
+      "minutes": 25,
+      "missions": [
+        {
+          "id": "M2",
+          "ask": "classify status codes with eval case()",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | eval class=case(status<300,\"success\",status<500,\"client error\",1==1,\"server error\") | stats count by class",
+          "expect": "success 34282 / client error 3085 / server error 2165"
+        },
+        {
+          "id": "M3",
+          "ask": "events above their own host's mean size",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | eventstats avg(bytes) as host_avg by host | where bytes>host_avg | stats count",
+          "expect": "19744"
+        },
+        {
+          "id": "M5",
+          "ask": "rex out user and src_ip from the SSH logs",
+          "spl": "index=tutorial sourcetype=secure-2 | rex \"(?i)password for (invalid user )?(?<user>\\\\S+) from (?<src_ip>\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+)\" | stats dc(user) as users dc(src_ip) as ips",
+          "expect": "154 / 185"
+        },
+        {
+          "id": "M6",
+          "ask": "events written 'failed password' in lowercase",
+          "spl": "index=tutorial sourcetype=secure-2 | rex \"(?<lower>failed password)\" | search lower=* | stats count",
+          "expect": "184"
+        }
+      ]
+    },
+    {
+      "id": "02-visualization",
       "title": "Visualization",
       "minutes": 25,
       "missions": [
@@ -94,7 +131,7 @@
       ]
     },
     {
-      "id": "02-working-with-time",
+      "id": "03-working-with-time",
       "title": "Working with time",
       "minutes": 25,
       "missions": [
@@ -120,7 +157,7 @@
       ]
     },
     {
-      "id": "03-statistical-processing",
+      "id": "04-statistical-processing",
       "title": "Statistical processing",
       "minutes": 25,
       "missions": [
@@ -142,11 +179,17 @@
           "ask": "events above the overall mean size",
           "spl": "index=tutorial sourcetype=access_combined_wcookie | eventstats avg(bytes) as m | where bytes>m | stats count",
           "expect": "19744"
+        },
+        {
+          "id": "CH",
+          "ask": "average of averages vs true mean",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie | stats avg(bytes) as m by host | stats avg(m) as avg_of_avgs | eval avg_of_avgs=round(avg_of_avgs,2)",
+          "expect": "2097.88"
         }
       ]
     },
     {
-      "id": "04-lookups-and-subsearches",
+      "id": "05-lookups-and-subsearches",
       "title": "Lookups and subsearches",
       "minutes": 30,
       "requires": "lookup definitions prices_lookup and http_status_lookup, created by the learner in M1",
@@ -192,11 +235,37 @@
           "ask": "site-wide 5xx rate",
           "spl": "index=tutorial sourcetype=access_combined_wcookie | stats count as n count(eval(status>=500)) as err | eval rate=round(err*100/n,3)",
           "expect": "5.477"
+        },
+        {
+          "id": "CH",
+          "ask": "how many vendors are tied on the widest catalogue",
+          "spl": "index=tutorial sourcetype=vendor_sales | stats dc(Code) as products by VendorID | stats count as vendors by products | sort 1 -products",
+          "expect": "14 / 219"
         }
       ]
     },
     {
-      "id": "05-search-optimization",
+      "id": "06-knowledge-objects",
+      "title": "Making knowledge stick",
+      "minutes": 30,
+      "note": "mostly UI work; figures depend on objects the learner creates",
+      "missions": [
+        {
+          "id": "M2",
+          "ask": "events matching the ssh_failure definition",
+          "spl": "index=tutorial sourcetype=secure-2 \"failed password\" | stats count",
+          "expect": "33253"
+        },
+        {
+          "id": "M4",
+          "ask": "source addresses above 500 failures",
+          "spl": "index=tutorial sourcetype=secure-2 \"failed password\" | rex \"(?i) from (?<src_ip>\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+)\" | stats count by src_ip | where count>500 | stats count",
+          "expect": "5"
+        }
+      ]
+    },
+    {
+      "id": "07-search-optimization",
       "title": "Search optimization and detection sizing",
       "minutes": 30,
       "note": "scan counts are read in the Job Inspector, not returned by a search",
@@ -226,6 +295,31 @@
           "id": "M6",
           "ask": "requests needed per IP for a 4-sigma doubling test",
           "expect": "276"
+        }
+      ]
+    },
+    {
+      "id": "08-capstone-investigation",
+      "title": "Capstone: the 3 a.m. page",
+      "minutes": 45,
+      "missions": [
+        {
+          "id": "S1",
+          "ask": "scope of the failures",
+          "spl": "index=tutorial sourcetype=secure-2 \"failed password\" | rex \"(?i)password for (invalid user )?(?<user>\\\\S+) from (?<src_ip>\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+)\" | stats count dc(user) as accounts dc(src_ip) as sources",
+          "expect": "33253 / 154 / 185"
+        },
+        {
+          "id": "S2",
+          "ask": "internal/external x success/failure — the decisive table",
+          "spl": "index=tutorial sourcetype=secure-2 password | rex \"(?i) from (?<src_ip>\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+)\" | eval scope=if(match(src_ip,\"^10\\\\.\"),\"internal\",\"external\"), outcome=if(match(_raw,\"(?i)accepted\"),\"success\",\"failure\") | stats count by scope outcome",
+          "expect": "external failure 33069 / internal failure 184 / internal success 1599 (and NO external success)"
+        },
+        {
+          "id": "S5",
+          "ask": "web client IPs that also appear in the SSH failures",
+          "spl": "index=tutorial sourcetype=access_combined_wcookie [ search index=tutorial sourcetype=secure-2 \"failed password\" | rex \"(?i) from (?<src_ip>\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+)\" | stats count by src_ip | rename src_ip as clientip | fields clientip ] | stats dc(clientip)",
+          "expect": "182 (out of 182 web IPs — a 100% overlap is a property of the dataset, not evidence)"
         }
       ]
     }

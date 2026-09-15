@@ -39,11 +39,21 @@ Any statement about "the busiest day of the week" in this lab is an artifact. Ho
 Practical consequence: after a few days the data ages out of the short relative ranges. When
 `./setup/lab.sh status --json` reports `data_age_hours` above ~36, run `./setup/lab.sh reindex --yes`.
 
-## Trap 2 — `secure-2` has only 8 distinct timestamps
+## Trap 2 — `secure-2` timestamps are clustered, and its fields are missing
 
-All 10 593 SSH events of a given day carry the same `23:23:5x` timestamp. That is how the vendor's
-file is built, not a loading bug. A `timechart` on `secure-2` therefore shows one tall spike per day,
-which looks exactly like an attack and is an artifact of the file.
+Measured on 2026-09-15: **18 distinct timestamps for 40 088 events**. The vendor regenerates the
+archive from time to time and that number moves (it was 8 on an earlier download), so measure it
+rather than quoting it: `| stats dc(_time)`. Either way the conclusion holds — a `timechart` on
+`secure-2` shows a few tall spikes that look exactly like an attack and are an artifact of the file.
+
+`secure-2` also arrives with **almost nothing extracted**: no user, no source IP, just text. That is
+not a loading failure, it is the raw material of lab 01 (`rex`) and lab 06 (permanent field
+extractions).
+
+And a detail that becomes the point of a whole mission: **184 of its events write `failed password` in
+lowercase**. Splunk's search terms are case-insensitive so a term search finds them, but a regex is
+case-sensitive and silently drops them — and those 184 events are exactly the *internal* failures,
+the only ones an analyst would care about.
 
 Use `access_combined_wcookie` for anything involving time. `vendor_sales` is synthetically flat
 (exactly 180 events per hour), which makes it good for statistics and useless for trends.
@@ -79,3 +89,12 @@ Not stable — they depend on the hour you run them:
 - weekday names, as explained above.
 
 The labs mark which is which.
+
+## Trap 4 — every web client also appears in the SSH logs
+
+All **182** distinct `clientip` values of the web logs are among the **185** source addresses of the
+SSH failures. In a real network that would be extraordinary; here it means the two sources were
+generated from one pool of addresses.
+
+It is left in on purpose: lab 08 walks the learner into running that correlation and reading the
+number. **A correlation of 100 % is a statement about your pipeline, not about an adversary.**

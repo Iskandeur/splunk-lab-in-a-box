@@ -1,6 +1,13 @@
-# Lab 03 — Statistical processing
+# Lab 04 — Statistical processing
+
+**Day 5.** Counting is easy. Saying something true about the counts is the job.
 
 **Time:** 25 min · **Range:** *Last 30 days* everywhere, so your numbers match the key exactly.
+
+**Before you start:** labs 00–03.
+**After this lab you can:** aggregate with the right function, compare an event to its group with
+`eventstats`, and know why a mean, a median and a 95th percentile tell three different stories about
+the same column.
 
 ---
 
@@ -119,6 +126,12 @@ an error?
 On `vendor_sales`: the three most active `VendorID`, and the most frequent `Code`. Then try to sum a
 `price` field, and explain the empty result.
 
+### Challenge
+
+Your colleague computes the average response size per host, then averages those three numbers to get
+"the site average". Write the two searches that show his number and the true one, and explain in one
+sentence why they differ — and when they would not.
+
 ---
 
 ## Answer key
@@ -149,4 +162,10 @@ On `vendor_sales`: the three most active `VendorID`, and the most frequent `Code
 - **M7** — VendorID **1060** (135), **7014** (133), then **1005 and 1015 tied at 128** — a tie, so
   any "top 3" here is arbitrary unless you add a second sort key. Most frequent `Code`: **L**
   (3 148). `sum(price)` is empty because **`price` is not a field of these events** — it lives in
-  `prices.csv`, and joining the two is lab 04.
+  `prices.csv`, and joining the two is lab 05.
+- **Challenge** — the true mean is `| stats avg(bytes)` → **2 097,73**. Averaging the three host
+  means (2 088,8 / 2 100,1 / 2 104,7) gives **2 097,88**: close, because the three hosts carry
+  almost the same number of events. **An average of averages weights each group equally instead of
+  each event equally** — the error is invisible here and catastrophic the day one host carries 90 %
+  of the traffic. The general fix is to keep the counts: `| stats sum(bytes) as b, count as n by host
+  | stats sum(b)/sum(n)`.

@@ -1,6 +1,15 @@
-# Lab 04 — Lookups and subsearches
+# Lab 05 — Lookups and subsearches
+
+**Day 6.** The sales logs contain nothing but codes. Today you turn `Code=B` into "Dream Crusher,
+€24.99" — which is the moment logs become business information, and the most reusable skill in the
+course.
 
 **Time:** 30 min · **Range:** *Last 30 days* everywhere.
+
+**Before you start:** labs 00–04.
+**After this lab you can:** enrich events from a reference file, check that the enrichment is
+complete, filter one source by the contents of another, and — the mission that pays for the whole
+course — tell a busy address from a dangerous one.
 
 This lab is written as **missions**: a business request, a deliverable, a hint if you are stuck, and
 an answer key holding both the query and the figure. **If your figure matches, your query is right,
@@ -151,6 +160,11 @@ The catch: the list of expensive products lives in the **CSV**, the purchases li
 
 **Deliverable:** a lookup file created by the query, and proof that it reads back.
 
+### Challenge
+
+Which reseller carries the widest catalogue — the most distinct products sold? Rank them, then look
+at the top of your ranking before answering.
+
 ---
 
 ## Answer key
@@ -198,7 +212,7 @@ over 30 244 sales (30 % of catalogue value).
 lookup never complains — it leaves a hole.** Write this check every time you wire up a reference
 file.
 (Do not test the emptiness by turning it into a string: `if(isnull(x),"NULL",x)` then
-`search x=NULL` also catches events whose real value is the word `NULL` — see lab 01, M5.)
+`search x=NULL` also catches events whose real value is the word `NULL` — see lab 02, M5.)
 
 **M6** —
 ```
@@ -253,3 +267,9 @@ then `| inputlookup top_ips.csv`. You have just written a watchlist — the exac
 blocked-IP lists, sensitive accounts and critical assets in production.
 ⚠️ `outputlookup` **overwrites without asking**. In production, write to a dated file, or read and
 merge first.
+- **Challenge** — `| stats dc(Code) as products, count as sales by VendorID | sort - products` →
+  the maximum is **14** distinct products, and **219 vendors** are tied at it. "The widest catalogue"
+  has no single answer here, and a dashboard showing "top vendor by variety" would display whichever
+  of the 219 the sort happened to put first, differently on each run. When a ranking is topped by a
+  large tie, the ranking is the wrong question — ask for the distribution instead
+  (`| stats count by products`).

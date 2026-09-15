@@ -69,7 +69,10 @@ next person's evening.
 
 ## 8. Pace
 
-Labs 00–03 are 20–25 minutes each, 04 and 05 about 30. A learner who has done 00 to 03 in one sitting
-has absorbed enough; 04 is the one that pays off at work, and 05 is the one that separates an analyst
-from a query writer. If time is short, skip 05's exercises but read its answer key aloud — it is
-written to be readable on its own.
+Labs 00–04 are 20–25 minutes each, 05–07 about 30, and the capstone 45. A learner who has done 00 to
+03 in one sitting has absorbed enough for one day.
+
+If time is short: 00, 01 and 05 are the three that pay off fastest at work. 07 separates an analyst
+from a query writer and reads well even without doing the exercises. 08 is worth protecting — it is
+where the six habits of the course become one story, and a learner who skips it keeps the commands
+and loses the method.
