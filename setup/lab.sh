@@ -19,8 +19,14 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(dirname "$HERE")"
-ENV_FILE="$HERE/.env"
-WORK="$HERE/.work"
+# State (credentials, downloads) lives next to this script in a clone. When installed as a Claude
+# Code plugin the script directory is replaced on every update, so the plugin commands point
+# LAB_STATE_DIR at the plugin's persistent data directory instead. An existing clone's .env wins,
+# so both ways of running the lab share one set of credentials for the one container.
+STATE="${LAB_STATE_DIR:-$HERE}"
+ENV_FILE="$STATE/.env"
+if [ ! -f "$ENV_FILE" ] && [ -f "$HERE/.env" ]; then ENV_FILE="$HERE/.env"; fi
+WORK="$STATE/.work"
 COMPOSE=(docker compose -f "$HERE/docker-compose.yml" --env-file "$ENV_FILE")
 DATA_URL="https://docs.splunk.com/images/Tutorial/tutorialdata.zip"
 PRICES_URL="https://docs.splunk.com/images/d/db/Prices.csv.zip"
@@ -33,7 +39,8 @@ say() { echo "==> $*"; }
 
 init_env() {
   [ -f "$ENV_FILE" ] && return 0
-  say "first run: generating credentials in setup/.env (gitignored)"
+  say "first run: generating credentials in $ENV_FILE (gitignored)"
+  mkdir -p "$(dirname "$ENV_FILE")"
   local pw; pw="$(openssl rand -base64 18 | tr -d '/+=' | head -c 20)"
   sed "s/^SPLUNK_PASSWORD=.*/SPLUNK_PASSWORD=$pw/" "$HERE/.env.example" > "$ENV_FILE"
   chmod 600 "$ENV_FILE"

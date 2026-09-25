@@ -72,9 +72,23 @@ tooling, and the data traps it must not get wrong. A session that starts in this
 ```
 
 Custom commands are provided in `.claude/commands/`: `/lab-start`, `/lab-status`, `/lab-next`,
-`/lab-check`.
+`/lab-check`. Progress lives in `.lab-progress.json` (gitignored), so a new session resumes where
+you stopped.
 
-Progress lives in `.lab-progress.json` (gitignored), so a new session resumes where you stopped.
+## Or install it as a Claude Code plugin
+
+No clone needed: the plugin carries the lab scripts, the nine labs and the coach.
+
+```bash
+claude plugin marketplace add Iskandeur/splunk-lab-in-a-box
+claude plugin install splunk-lab-in-a-box@splunk-lab-in-a-box
+```
+
+Then, in any session, type `/splunk-lab-in-a-box:lab-start`. The other commands are `lab-status`,
+`lab-next` and `lab-check <SPL>`. Credentials, downloads and progress are kept in the plugin's data
+directory (`~/.claude/plugins/data/`), so they survive plugin updates. Loading the plugin from a
+clone (`claude --plugin-dir .`) reuses the clone's `setup/.env`. A clone and an installed copy both
+drive the one container named `splunk-lab`, so pick one of the two per machine.
 
 ## Requirements
 

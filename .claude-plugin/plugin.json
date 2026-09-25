@@ -1,0 +1,12 @@
+{
+  "name": "splunk-lab-in-a-box",
+  "displayName": "Splunk Lab in a Box",
+  "description": "Run and teach a complete, self-hosted Splunk lab (Buttercup Games dataset + guided labs) via Claude Code commands.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": {
+    "name": "Iskandeur"
+  },
+  "homepage": "https://github.com/Iskandeur/splunk-lab-in-a-box",
+  "repository": "https://github.com/Iskandeur/splunk-lab-in-a-box"
+}

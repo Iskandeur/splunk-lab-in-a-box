@@ -1,0 +1,14 @@
+{
+  "name": "splunk-lab-in-a-box",
+  "owner": { "name": "Iskandeur" },
+  "plugins": [
+    {
+      "name": "splunk-lab-in-a-box",
+      "displayName": "Splunk Lab in a Box",
+      "description": "A turnkey, self-hosted Splunk lab with nine hands-on labs and a coach that grades your SPL on measured figures.",
+      "category": "security",
+      "tags": ["splunk", "siem", "training", "lab"],
+      "source": "./"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ This script creates them temporarily and removes the ones it created, so it neve
 the exercise for anybody.
 """
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -24,9 +25,17 @@ ROOT = HERE.parent
 LOOKUPS = {"prices_lookup": "prices.csv", "http_status_lookup": "http_status.csv"}
 
 
+def env_file():
+    # Same resolution as setup/lab.sh: LAB_STATE_DIR (plugin install) unless a clone's .env exists.
+    state = os.environ.get("LAB_STATE_DIR")
+    if state and (pathlib.Path(state) / ".env").is_file():
+        return pathlib.Path(state) / ".env"
+    return HERE / ".env"
+
+
 def env():
     values = {}
-    for line in (HERE / ".env").read_text().splitlines():
+    for line in env_file().read_text().splitlines():
         if "=" in line and not line.startswith("#"):
             k, v = line.split("=", 1)
             values[k] = v
