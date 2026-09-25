@@ -1,7 +1,7 @@
 {
-  "name": "splunk-lab-in-a-box",
-  "displayName": "Splunk Lab in a Box",
-  "description": "Run and teach a complete, self-hosted Splunk lab (Buttercup Games dataset + guided labs) via Claude Code commands.",
+  "name": "siem-lab-coach",
+  "displayName": "SIEM Lab Coach",
+  "description": "A turnkey, self-hosted Splunk lab with nine hands-on labs and a coach that grades your SPL on measured figures.",
   "version": "0.1.0",
   "license": "MIT",
   "author": {

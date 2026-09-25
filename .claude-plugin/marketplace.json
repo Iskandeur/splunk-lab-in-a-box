@@ -1,10 +1,11 @@
 {
-  "name": "splunk-lab-in-a-box",
+  "name": "siem-lab-coach",
   "owner": { "name": "Iskandeur" },
+  "description": "Hands-on SIEM training: a self-hosted Splunk lab and the coach that runs it.",
   "plugins": [
     {
-      "name": "splunk-lab-in-a-box",
-      "displayName": "Splunk Lab in a Box",
+      "name": "siem-lab-coach",
+      "displayName": "SIEM Lab Coach",
       "description": "A turnkey, self-hosted Splunk lab with nine hands-on labs and a coach that grades your SPL on measured figures.",
       "category": "security",
       "tags": ["splunk", "siem", "training", "lab"],
